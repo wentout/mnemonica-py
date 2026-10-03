@@ -404,12 +404,14 @@ wheels = [
 name = "mnemonica"
 version = "0.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "mnemonica-lethe" },
+]
 
 [package.dev-dependencies]
 dev = [
     { name = "hypothesis" },
     { name = "jsonschema" },
-    { name = "mnemonica-lethe" },
     { name = "mypy" },
     { name = "pyright" },
     { name = "pytest" },
@@ -419,12 +421,12 @@ dev = [
 ]
 
 [package.metadata]
+requires-dist = [{ name = "mnemonica-lethe", git = "https://github.com/mythographica/lethe?rev=v0.1.0" }]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "hypothesis", specifier = ">=6.168.3" },
     { name = "jsonschema", specifier = ">=4.26.0" },
-    { name = "mnemonica-lethe", editable = "../lethe" },
     { name = "mypy", specifier = ">=2.3.1" },
     { name = "pyright", specifier = ">=1.1.414" },
     { name = "pytest", specifier = ">=9.1.1" },
@@ -436,7 +438,7 @@ dev = [
 [[package]]
 name = "mnemonica-lethe"
 version = "0.1.0"
-source = { editable = "../lethe" }
+source = { git = "https://github.com/mythographica/lethe?rev=v0.1.0#f12d24a5fde30432347610bf111be7dc7bf89724" }
 
 [[package]]
 name = "mypy"

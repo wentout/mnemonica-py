@@ -4,7 +4,26 @@ version = "0.1.0"
 description = "Instance inheritance for Python: subtypes are real subclasses, and every instance keeps a live link to the instance it was made from."
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+license = "MIT"
+authors = [{ email = "went.out@gmail.com" }]
+keywords = ["inheritance", "instance", "lineage", "provenance", "type-system"]
+classifiers = [
+    "Programming Language :: Python :: 3.12",
+    "Typing :: Typed",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    # PEP 508 direct reference: pip installs lethe from the git tag too
+    # (uv reads the same line; no separate source entry needed). When
+    # publishing to PyPI, replace with a plain "mnemonica-lethe>=0.1.0" —
+    # PyPI rejects direct references.
+    "mnemonica-lethe @ git+https://github.com/mythographica/lethe@v0.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/wentout/mnemonica-py"
+Repository = "https://github.com/wentout/mnemonica-py"
+Issues = "https://github.com/wentout/mnemonica-py/issues"
 
 [project.scripts]
 mnemonica-stubgen = "mnemonica.stubgen:main"
@@ -17,7 +36,6 @@ build-backend = "uv_build"
 dev = [
     "hypothesis>=6.168.3",
     "jsonschema>=4.26.0",
-    "mnemonica-lethe",
     "mypy>=2.3.1",
     "pyright>=1.1.414",
     "pytest>=9.1.1",
@@ -40,17 +58,11 @@ files = ["src", "tests"]
 # tests/test_stubgen.py; without the stubs they intentionally do not
 # type-check (that is what the stubs are for)
 exclude = "^tests/fixtures/"
-# the editable path dev-dependency resolves through a .pth finder mypy
-# does not follow; point mypy at the source tree directly
-mypy_path = "../lethe"
 
 [tool.pyright]
 typeCheckingMode = "strict"
 include = ["src", "tests"]
 exclude = ["tests/fixtures"]
-# the editable path dev-dependency resolves through a .pth finder; point
-# pyright at the source tree (same reason as mypy_path above)
-executionEnvironments = [{ root = ".", extraPaths = ["../lethe"] }]
 
 [tool.ruff]
 target-version = "py312"
@@ -58,6 +70,3 @@ target-version = "py312"
 exclude = ["*.md"]
 # stubgen fixtures and their golden stubs are test data, not linted code
 extend-exclude = ["tests/fixtures"]
-
-[tool.uv.sources]
-mnemonica-lethe = { path = "../lethe", editable = true }

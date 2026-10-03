@@ -38,10 +38,17 @@ admin.name = "eve"  # lands on admin; user.name stays "ada"
 
 ## Install
 
+From GitHub (tagged release):
+
 ```bash
-pip install mnemonica
+pip install git+https://github.com/wentout/mnemonica-py@v0.1.0
+# or, in a uv-managed project:
+uv add git+https://github.com/wentout/mnemonica-py@v0.1.0
 ```
 
+A PyPI release is planned; until then, install from GitHub. (For the
+PyPI release the lethe dependency becomes a plain `mnemonica-lethe>=0.1.0`
+— PyPI rejects direct git references — so lethe must reach PyPI first.)
 Requires Python ≥ 3.12.
 
 ## Defining types
