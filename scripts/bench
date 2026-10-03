@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+"""Benchmarks for mnemonica core Python (P6, contract §4.5).
+
+Construction cost and deep-chain read cost (depth 1/10/100) vs a plain
+Python object, sync and async construction. Raw output goes to the
+experiments folder; docs/performance.md holds the summary. Numbers only,
+no "fast" claims.
+"""
+
+import argparse
+import asyncio
+import json
+import platform
+import time
+import timeit
+from collections.abc import Awaitable, Callable
+from pathlib import Path
+from typing import Any
+
+from mnemonica import Mnemonic, createTypesCollection
+
+REPEATS = 7
+NUMBER = 2000
+
+
+def _build_types(depth: int) -> tuple[Any, Any, Any]:
+    """A fresh collection with a root, `depth` nested sync subtypes, one
+    async subtype."""
+
+    collection = createTypesCollection()
+
+    @collection.define
+    class BenchRoot(Mnemonic):
+        def __init__(self, name: str) -> None:
+            self.name = name
+
+    parent: Any = BenchRoot
+    for level in range(1, depth + 1):
+        field = f"f{level}"
+
+        def handler(self: Any, value: int, _field: str = field) -> None:
+            setattr(self, _field, value)
+
+        parent = parent.define(f"BenchLevel{level}", handler)
+
+    async def async_handler(self: Any, value: int) -> None:
+        self.async_value = value
+
+    async_child = BenchRoot.define("BenchAsyncChild", async_handler)
+    return BenchRoot, parent, async_child
+
+
+class _Plain:
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+
+def _build_chain(root_type: Any, depth: int) -> Any:
+    node: Any = root_type("root")
+    for level in range(1, depth + 1):
+        node = getattr(node, f"BenchLevel{level}")(level)
+    return node
+
+
+def _min_per_op(fn: Callable[[], Any]) -> float:
+    samples = timeit.repeat(fn, number=NUMBER, repeat=REPEATS)
+    result = min(samples) / NUMBER
+    return result
+
+
+async def _min_per_op_async(fn: Callable[[], Awaitable[Any]], n: int) -> float:
+    for _ in range(10):
+        await fn()
+    best = float("inf")
+    for _ in range(REPEATS):
+        start = time.perf_counter()
+        for _ in range(n):
+            await fn()
+        elapsed = (time.perf_counter() - start) / n
+        best = min(best, elapsed)
+    result = best
+    return result
+
+
+def _cpu_model() -> str:
+    try:
+        with open("/proc/cpuinfo", encoding="utf-8") as handle:
+            for line in handle:
+                if line.startswith("model name"):
+                    return line.split(":", 1)[1].strip()
+    except OSError:
+        pass
+    return platform.processor() or "unknown"
+
+
+def run_benchmarks() -> dict[str, Any]:
+    results: dict[str, Any] = {
+        "machine": {
+            "platform": platform.platform(),
+            "cpu": _cpu_model(),
+            "python": platform.python_version(),
+            "implementation": platform.python_implementation(),
+        },
+        "method": {
+            "timer": "timeit.repeat min/N (sync), best-of-R loops (async)",
+            "repeats": REPEATS,
+            "number": NUMBER,
+            "units": "seconds per operation",
+        },
+    }
+    for depth in (1, 10, 100):
+        root_type, _leaf_type, async_child = _build_types(depth)
+        leaf = _build_chain(root_type, depth)
+        plain = _Plain("root")
+
+        async def async_construct() -> None:
+            parent = root_type("root")
+            await async_child.of(parent, 1)
+
+        def sync_construct() -> None:
+            node = root_type("root")
+            getattr(node, "BenchLevel1")(1)
+
+        results[f"depth_{depth}"] = {
+            "construction_seconds_per_op": {
+                "mnemonica_root": _min_per_op(lambda: root_type("root")),
+                # one subtype construction FROM an instance (single step,
+                # independent of the chain depth used for reads)
+                "mnemonica_subtype_from_instance": _min_per_op(
+                    lambda: getattr(root_type("root"), "BenchLevel1")(1)
+                ),
+                "plain_object": _min_per_op(lambda: _Plain("root")),
+                "async_subtype_awaited": asyncio.run(
+                    _min_per_op_async(async_construct, 200)
+                ),
+                "sync_subtype_for_comparison": _min_per_op(sync_construct),
+            },
+            "read_seconds_per_op": {
+                "mnemonica_chain_root_field": _min_per_op(lambda: leaf.name),
+                "plain_object_field": _min_per_op(lambda: plain.name),
+            },
+        }
+    return results
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args()
+    args.out.mkdir(parents=True, exist_ok=True)
+    results = run_benchmarks()
+    raw = json.dumps(results, indent=2)
+    (args.out / "results.json").write_text(raw + "\n", encoding="utf-8")
+    print(raw)
+    result = 0
+    return result
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

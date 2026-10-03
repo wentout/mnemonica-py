@@ -1,0 +1,63 @@
+[project]
+name = "mnemonica"
+version = "0.1.0"
+description = "Instance inheritance for Python: subtypes are real subclasses, and every instance keeps a live link to the instance it was made from."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+mnemonica-stubgen = "mnemonica.stubgen:main"
+
+[build-system]
+requires = ["uv_build>=0.11.2,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.168.3",
+    "jsonschema>=4.26.0",
+    "mnemonica-lethe",
+    "mypy>=2.3.1",
+    "pyright>=1.1.414",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.9",
+    "types-jsonschema>=4.26.0.20260518",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=mnemonica --cov-branch --cov-report=term-missing --cov-fail-under=100"
+
+[tool.coverage.run]
+source = ["mnemonica"]
+
+[tool.mypy]
+strict = true
+files = ["src", "tests"]
+# stubgen fixtures are checked WITH their generated stubs by
+# tests/test_stubgen.py; without the stubs they intentionally do not
+# type-check (that is what the stubs are for)
+exclude = "^tests/fixtures/"
+# the editable path dev-dependency resolves through a .pth finder mypy
+# does not follow; point mypy at the source tree directly
+mypy_path = "../lethe"
+
+[tool.pyright]
+typeCheckingMode = "strict"
+include = ["src", "tests"]
+exclude = ["tests/fixtures"]
+# the editable path dev-dependency resolves through a .pth finder; point
+# pyright at the source tree (same reason as mypy_path above)
+executionEnvironments = [{ root = ".", extraPaths = ["../lethe"] }]
+
+[tool.ruff]
+target-version = "py312"
+# Markdown code blocks are illustrative docs (plans, README), not shipped code.
+exclude = ["*.md"]
+# stubgen fixtures and their golden stubs are test data, not linted code
+extend-exclude = ["tests/fixtures"]
+
+[tool.uv.sources]
+mnemonica-lethe = { path = "../lethe", editable = true }
