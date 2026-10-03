@@ -1,23 +1,21 @@
 [project]
 name = "mnemonica"
-version = "0.1.0"
+version = "0.1.1"
 description = "Instance inheritance for Python: subtypes are real subclasses, and every instance keeps a live link to the instance it was made from."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ email = "went.out@gmail.com" }]
 keywords = ["inheritance", "instance", "lineage", "provenance", "type-system"]
 classifiers = [
     "Programming Language :: Python :: 3.12",
     "Typing :: Typed",
-    "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-    # PEP 508 direct reference: pip installs lethe from the git tag too
-    # (uv reads the same line; no separate source entry needed). When
-    # publishing to PyPI, replace with a plain "mnemonica-lethe>=0.1.0" —
-    # PyPI rejects direct references.
-    "mnemonica-lethe @ git+https://github.com/mythographica/lethe@v0.1.0",
+    # a plain PyPI requirement: PyPI rejects direct (git) references in
+    # published metadata; mnemonica-lethe is published on PyPI
+    "mnemonica-lethe>=0.1.0",
 ]
 
 [project.urls]

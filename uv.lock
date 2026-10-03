@@ -402,7 +402,7 @@ wheels = [
 
 [[package]]
 name = "mnemonica"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "mnemonica-lethe" },
@@ -421,7 +421,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "mnemonica-lethe", git = "https://github.com/mythographica/lethe?rev=v0.1.0" }]
+requires-dist = [{ name = "mnemonica-lethe", specifier = ">=0.1.0" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -438,7 +438,11 @@ dev = [
 [[package]]
 name = "mnemonica-lethe"
 version = "0.1.0"
-source = { git = "https://github.com/mythographica/lethe?rev=v0.1.0#f12d24a5fde30432347610bf111be7dc7bf89724" }
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/52/bc/9e20a9bdb381bbf75bc3a6d10b1f489e7f0f4339157dbf3c7485057caa7f/mnemonica_lethe-0.1.0.tar.gz", hash = "sha256:bc9e472281f5d20f2641d25f92573658cf6858516b8b37944957a9638f5b5ad2", size = 5347, upload-time = "2026-10-03T15:47:01.521Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/82/c3/e7b2b904775690b9f998b324e9f4a937b91c3205f0b5f2fd8d725616a24a/mnemonica_lethe-0.1.0-py3-none-any.whl", hash = "sha256:98e828ae544b5f6de85e4a79ef31cd576596cd041baf8fab6c0130c17d56d92b", size = 6318, upload-time = "2026-10-03T15:47:02.732Z" },
+]
 
 [[package]]
 name = "mypy"
