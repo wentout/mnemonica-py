@@ -38,7 +38,7 @@ _id_counter = 0
 _instance_ids: weakref.WeakKeyDictionary[object, str] = weakref.WeakKeyDictionary()
 
 
-def _id_of(instance: object) -> str:
+def id_of(instance: object) -> str:
     """The instance's id, assigned lazily and retained nowhere."""
     global _id_counter
     known = _instance_ids.get(instance)
@@ -155,7 +155,7 @@ def _visit(instance: object, graph: _Graph) -> str:
     record = get_props(instance)
     if record is None:
         raise WrongModificationPattern("lineage: instance has no construction context")
-    identity = _id_of(instance)
+    identity = id_of(instance)
     # dedup at any depth; the visiting set also breaks instance-valued
     # field cycles (a field pointing at its own instance)
     if identity in graph.nodes or identity in graph.visiting:

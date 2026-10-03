@@ -49,6 +49,7 @@ __all__ = [
     "exception",
     "extract",
     "fork",
+    "id_of",
     "lineage",
     "merge",
     "parent",
@@ -431,4 +432,6 @@ def collectConstructors(
 # deepParse / lineage live in their own module (the lethe export); they
 # are imported here, at the END, because lineage builds on parse — the
 # circular reference resolves only once parse exists
-from mnemonica.utils.lineage import deepParse, lineage
+# id_of is the public lazy instance id (a span and a lineage
+# graph join on it)
+from mnemonica.utils.lineage import deepParse, id_of, lineage

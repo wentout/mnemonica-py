@@ -84,8 +84,13 @@ span several phases); they close as their content lands.
 
 | id | item | status | reason |
 |---|---|---|---|
-| L-otel | observability (OpenTelemetry) | open (later) | contract §6: separate plan when P6 is green |
 | L-tactica-output | shipping pre-generated stubs with a release (`.tactica`-style output) | open (later) | the generator itself is ported (T-stubgen); shipping its output is a publishing decision, and publishing is viktor's |
+
+## OpenTelemetry (the L2 link, after P6)
+
+| id | contract item | port test(s) | status | note |
+|---|---|---|---|---|
+| OTEL | the Go otelx contract: the four attribute names, `stamp_constructions`, `start_linked_span`, `record_lineage` | tests/test_otel.py (all; end-to-end sync + async with the SDK's InMemorySpanExporter) | adapted | optional extra `mnemonica[otel]` (`opentelemetry-api` only; SDK in dev deps); `mnemonica.otel` imports opentelemetry lazily — `import mnemonica` never pulls it (pinned by a subprocess test) and the helpers explain with `ImportError("mnemonica[otel]…")` when the extra is missing. Adaptations from Go: the current span comes from the contextvars context (no ctx parameter), so the hook reads `trace.get_current_span()` and records that SpanContext on the instance's record for the post-request link; unsupported/ unexported carriers raise `WrongArgumentsUsed` (Python has no NotAnInstance kind). Stamping cost measured and recorded in docs/performance.md |
 
 ## Coverage exclusions
 

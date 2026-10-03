@@ -35,3 +35,12 @@ plain object:
 Read-through walks the parent-instance links one `__dict__` at a time,
 so its cost grows with chain depth; the plain-object baseline is a
 single attribute read and has no depth dimension.
+
+## OTEL stamping (measured 2026-10-03, same machine)
+
+`otel.stamp_constructions(collection)` registers two hooks; per
+construction under a valid span the stamping adds ~3.9e-06 s (≈ +62% on
+a ~6.3e-06 s plain construction on this host) — the four attribute
+values including two id formats plus the SpanContext record. With no
+span current the hooks are a near-no-op (~+1.8e-06 s, the hook dispatch
+itself). Raw numbers: the experiments folder (2026-10-03-py-otel-bench).

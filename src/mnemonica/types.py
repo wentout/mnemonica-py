@@ -682,6 +682,11 @@ def _make_errored(
         "type": cls,
         "parent": parent,
         "args": args,
+        # the full construction context: an errored instance exports its
+        # own lineage graph like any instance (the Go parity: the errored
+        # instance is a node of its own graph)
+        "collection": cls.mn_collection,
+        "subtypes": cls.mn_subtypes,
         "exceptionReason": error,
         "reasons": [error],
         "surplus": [],

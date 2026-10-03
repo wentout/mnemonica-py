@@ -232,6 +232,48 @@ collections get automatic unique `collection_1`, `collection_2`, …
 names. A `name` in a type's define config is rejected with
 `OptionsError`.
 
+## OpenTelemetry (optional extra)
+
+```bash
+pip install "mnemonica[otel]"
+```
+
+The core never imports opentelemetry; `mnemonica.otel` imports it
+lazily, so everything keeps working without the extra. The attribute
+names are the cross-language contract (shared with the Go port), and the
+instance ids are `utils.lineage`'s — a trace and a lineage graph join on
+them: `mnemonica.instance.id`, `mnemonica.parent.id`,
+`mnemonica.type.collection`, `mnemonica.type.path`.
+
+```python
+from mnemonica import otel, utils
+
+otel.stamp_constructions(collection)   # once, at setup
+
+# in the request, under the request span:
+user = User("ada")
+admin = Admin.of(user, "root")         # stamped on the current span
+
+# after the request, in a task or thread:
+span = otel.start_linked_span(tracer, "background-job", admin)
+span.end()                             # linked to the request's span
+
+# on failure: an event with the lineage graph JSON in one attribute
+otel.record_lineage(utils.exception(admin, error), span=span)
+```
+
+- `stamp_constructions(collection)` hooks every construction —
+  successful or errored — stamping the four attributes on the span
+  current at construction, and records that span context on the instance
+  so post-request work can link back. No current span: a cheap no-op.
+- `start_linked_span(tracer, name, instance)` starts a span LINKED
+  (`trace.Link`) to the span current when the instance was constructed —
+  work that outlives the request still joins its trace.
+- `record_lineage(error, span=None)` adds a `mnemonica.error` span event
+  carrying the carried instance's lineage graph JSON in one attribute.
+  Carriers: `ErroredInstance` (a blocked construction or a
+  `utils.exception` result).
+
 ## Errors
 
 Every error is a distinct class under `MnemonicaError`, named after the
